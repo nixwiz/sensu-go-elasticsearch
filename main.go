@@ -4,84 +4,96 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
-	"github.com/jkerry/sensu-go-elasticsearch/lib/pkg/eventprocessing"
-	"github.com/spf13/cobra"
+	"github.com/nixwiz/sensu-go-elasticsearch/lib/pkg/eventprocessing"
+	"github.com/sensu-community/sensu-plugin-sdk/sensu"
+	corev2 "github.com/sensu/sensu-go/api/core/v2"
 )
 
+// Config represents the handler plugin config.
+type Config struct {
+	sensu.PluginConfig
+	DatedIndex            bool
+	FullEventLogging      bool
+	PointNameAsMetricName bool
+	Index                 string
+}
+
 var (
-	index                             string
-	dated_postfix, full_event_logging bool
-	point_name_as_metric_name         bool
+	plugin = Config{
+		PluginConfig: sensu.PluginConfig{
+			Name:     "sensu-go-elasticsearch",
+			Short:    "The Sensu Go handler for metric and event logging in elasticsearch\nRequired:  Set the ELASTICSEARCH_URL env var with an appropriate connection url (https://user:pass@hostname:port)",
+			Keyspace: "sensu.io/plugins/elasticsearch/config",
+		},
+	}
+
+	options = []*sensu.PluginConfigOption{
+		{
+			Path:      "dated_index",
+			Env:       "",
+			Argument:  "dated_index",
+			Shorthand: "d",
+			Default:   false,
+			Usage:     "Should the index have the current date postfixed? ie: metric_data-2019-06-27",
+			Value:     &plugin.DatedIndex,
+		},
+		{
+			Path:      "full_event_logging",
+			Env:       "",
+			Argument:  "full_event_logging",
+			Shorthand: "f",
+			Default:   false,
+			Usage:     "send the full event body instead of isolating event metrics",
+			Value:     &plugin.FullEventLogging,
+		},
+		{
+			Path:      "point_name_as_metric_name",
+			Env:       "",
+			Argument:  "point_name_as_metric_name",
+			Shorthand: "p",
+			Default:   false,
+			Usage:     "use the entire point name as the metric name",
+			Value:     &plugin.PointNameAsMetricName,
+		},
+		{
+			Path:      "index",
+			Env:       "",
+			Argument:  "index",
+			Shorthand: "p",
+			Default:   false,
+			Usage:     "index to use",
+			Value:     &plugin.Index,
+		},
+	}
 )
 
 func main() {
-	rootCmd := configureRootCommand()
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
-	}
+	handler := sensu.NewGoHandler(&plugin.PluginConfig, options, checkArgs, executeHandler)
+	handler.Execute()
 }
 
-func configureRootCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "sensu-go-elasticsearch",
-		Short: "The Sensu Go handler for metric and event logging in elasticsearch\nRequired:  Set the ELASTICSEARCH_URL env var with an appropriate connection url (https://user:pass@hostname:port)",
-		RunE:  run,
+func checkArgs(event *corev2.Event) error {
+	if len(plugin.Index) == 0 {
+		return fmt.Errorf("No index specified")
 	}
-
-	cmd.Flags().BoolVarP(&dated_postfix,
-		"dated_index",
-		"d",
-		false,
-		"Should the index have the current date postfixed? ie: metric_data-2019-06-27")
-
-	cmd.Flags().BoolVarP(&full_event_logging,
-		"full_event_logging",
-		"f",
-		false,
-		"send the full event body instead of isolating event metrics")
-
-	cmd.Flags().BoolVarP(&point_name_as_metric_name,
-		"point_name_as_metric_name",
-		"p",
-		false,
-		"use the entire point name as the metric name")
-
-	cmd.Flags().StringVarP(&index,
-		"index",
-		"i",
-		"",
-		"metric_data")
-	_ = cmd.MarkFlagRequired("index")
-	return cmd
+	return nil
 }
 
 func generateIndex() string {
-	if dated_postfix {
+	if plugin.DatedIndex {
 		dt := time.Now()
-		return fmt.Sprintf("%s-%s", index, dt.Format("2006.01.02"))
+		return fmt.Sprintf("%s-%s", plugin.Index, dt.Format("2006.01.02"))
 	}
-	return index
+	return plugin.Index
 }
 
-func run(cmd *cobra.Command, args []string) error {
-	if len(args) != 0 {
-		_ = cmd.Help()
-		return fmt.Errorf("invalid argument(s) received")
-	}
-
-	event, err := eventprocessing.GetPipedEvent()
-	if err != nil {
-		return fmt.Errorf("Could not process or validate event data from stdin: %v", err)
-	}
-
-	if full_event_logging {
+func executeHandler(event *corev2.Event) error {
+	if plugin.FullEventLogging {
 		eventValue, err := eventprocessing.ParseEventTimestamp(event)
 		if err != nil {
 			return fmt.Errorf("error processing sensu event into eventValue: %v", err)
@@ -90,7 +102,7 @@ func run(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("error serializing metric data to json payload: %v", err)
 		}
-		err = sendElasticSearchData(string(msg), index)
+		err = sendElasticSearchData(string(msg), plugin.Index)
 		if err != nil {
 			return fmt.Errorf("error sending metric data to elasticsearch: %v", err)
 		}
@@ -101,7 +113,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("event does not contain metrics")
 	}
 	for _, point := range event.Metrics.Points {
-		metric, err := eventprocessing.GetMetricFromPoint(point, event.Entity.Name, event.Entity.Namespace, event.Entity.Labels, point_name_as_metric_name)
+		metric, err := eventprocessing.GetMetricFromPoint(point, event.Entity.Name, event.Entity.Namespace, event.Entity.Labels, plugin.PointNameAsMetricName)
 		if err != nil {
 			return fmt.Errorf("error processing sensu event MetricPoints into MetricValue: %v", err)
 		}
@@ -109,7 +121,7 @@ func run(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("error serializing metric data to json payload: %v", err)
 		}
-		err = sendElasticSearchData(string(msg), index)
+		err = sendElasticSearchData(string(msg), plugin.Index)
 		if err != nil {
 			return fmt.Errorf("error sending metric data to elasticsearch: %v", err)
 		}

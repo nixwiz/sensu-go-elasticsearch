@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+sensu-go-elasticsearch
 
 # Test binary, build with `go test -c`
 *.test
