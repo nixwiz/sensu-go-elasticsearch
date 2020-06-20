@@ -2,16 +2,11 @@ package eventprocessing
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	corev2 "github.com/sensu/sensu-go/api/core/v2"
-)
-
-var (
-	stdin *os.File
 )
 
 type MetricValue struct {
@@ -24,7 +19,7 @@ type MetricValue struct {
 }
 
 type EventValue struct {
-	Timestamp string           `json:"timestamp"`
+	Timestamp string            `json:"timestamp"`
 	Entity    *corev2.Entity    `json:"entity"`
 	Check     *corev2.Check     `json:"check"`
 	Metrics   *corev2.Metrics   `json:"namespace"`

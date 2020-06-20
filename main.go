@@ -164,7 +164,7 @@ func sendElasticSearchData(metricBody string, index string) error {
 	} else if plugin.InsecureSkipVerify {
 		cfg.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: false,
+				InsecureSkipVerify: true,
 			},
 		}
 	}
