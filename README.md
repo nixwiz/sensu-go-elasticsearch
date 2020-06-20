@@ -1,8 +1,22 @@
 # Sensu Go Elasticsearch metric handler plugin
-[![Bonsai Asset Badge](https://img.shields.io/badge/Sensu%20Go%20Elasticsearch-Download%20Me-brightgreen.svg?colorB=89C967&logo=sensu)](https://bonsai.sensu.io/assets/jkerry/sensu-go-elasticsearch) [![TravisCI Build Status](https://travis-ci.org/jkerry/sensu-go-elasticsearch.svg?branch=master)](https://travis-ci.org/jkerry/sensu-go-elasticsearch)
+[![Bonsai Asset Badge](https://img.shields.io/badge/Sensu%20Go%20Elasticsearch-Download%20Me-brightgreen.svg?colorB=89C967&logo=sensu)](https://bonsai.sensu.io/assets/nixwiz/sensu-go-elasticsearch)[![Go Test](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/Go%20Test/badge.svg)](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/Go%20Test)[![Go Lint](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/Go%20Lint/badge.svg)](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/Go%20Lint)[![goreleaser](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/goreleaser/badge.svg)](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/goreleaser)
 
-sensu-go-elasticsearch is a sensu go handler for pushing metric data and full
-event bodies into elasticsearch for visualization in kibana.
+## Table of Contents
+- [Overview](#overview)
+- [Usage examples](#usage-examples)
+- [Configuration](#configuration)
+  - [Asset registration](#asset-registration)
+  - [Handler definition](#handler-definition)
+  - [Proxy support](#proxy-support)
+  - [Annotations](#annotations)
+  - [RBAC](#rbac)
+- [Installation from source](#installation-from-source)
+- [Contributing](#contributing)
+
+## Overview
+
+sensu-go-elasticsearch is a [Sensu Handler][2] for pushing metric data and full
+event bodies into Elasticsearch for visualization in Kibana.
 
 ## Installation
 

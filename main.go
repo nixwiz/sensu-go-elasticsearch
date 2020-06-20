@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"strings"
 	"time"
 
@@ -21,6 +24,8 @@ type Config struct {
 	FullEventLogging      bool
 	PointNameAsMetricName bool
 	Index                 string
+	TrustedCAFile         string
+	InsecureSkipVerify    bool
 }
 
 var (
@@ -64,10 +69,28 @@ var (
 			Path:      "index",
 			Env:       "",
 			Argument:  "index",
-			Shorthand: "p",
-			Default:   false,
+			Shorthand: "i",
+			Default:   "",
 			Usage:     "index to use",
 			Value:     &plugin.Index,
+		},
+		{
+			Path:      "insecure-skip-verify",
+			Env:       "",
+			Argument:  "insecure-skip-verify",
+			Shorthand: "s",
+			Default:   false,
+			Usage:     "skip TLS certificate verification (not recommended!)",
+			Value:     &plugin.InsecureSkipVerify,
+		},
+		{
+			Path:      "trusted-ca-file",
+			Env:       "",
+			Argument:  "trusted-ca-file",
+			Shorthand: "t",
+			Default:   "",
+			Usage:     "TLS CA certificate bundle in PEM format",
+			Value:     &plugin.TrustedCAFile,
 		},
 	}
 )
@@ -130,7 +153,22 @@ func executeHandler(event *corev2.Event) error {
 }
 
 func sendElasticSearchData(metricBody string, index string) error {
-	es, _ := elasticsearch.NewDefaultClient()
+	var cfg elasticsearch.Config
+
+	if len(plugin.TrustedCAFile) > 0 {
+		cert, err := ioutil.ReadFile(plugin.TrustedCAFile)
+		if err != nil {
+			return err
+		}
+		cfg.CACert = cert
+	} else if plugin.InsecureSkipVerify {
+		cfg.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: false,
+			},
+		}
+	}
+	es, _ := elasticsearch.NewClient(cfg)
 	req := esapi.IndexRequest{
 		Index:   generateIndex(),
 		Body:    strings.NewReader(metricBody),
