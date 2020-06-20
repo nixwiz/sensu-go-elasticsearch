@@ -7,6 +7,8 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [1.0.0] - 2020-06-20
+
 ### Changed
 - Use new Sensu SDK
 - Switch to GitHub Actions
