@@ -7,6 +7,12 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+- Use new Sensu SDK
+- Switch to GitHub Actions
+- Updated README
+- Add --insecure-skip-verify and --trusted-ca-file arguments
+
 ## [0.0.1] - 2000-01-01
 
 ### Added

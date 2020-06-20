@@ -1,44 +1,15 @@
 package eventprocessing
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/sensu/sensu-go/types"
+	corev2 "github.com/sensu/sensu-go/api/core/v2"
 )
 
-var (
-	stdin *os.File
-)
-
-func GetPipedEvent() (*types.Event, error) {
-	if stdin == nil {
-		stdin = os.Stdin
-	}
-
-	eventJSON, err := ioutil.ReadAll(stdin)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read stdin: %s", err.Error())
-	}
-	event := &types.Event{}
-	err = json.Unmarshal(eventJSON, event)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal stdin data: %s", err.Error())
-	}
-
-	if err = event.Validate(); err != nil {
-		return nil, fmt.Errorf("failed to validate event: %s", err.Error())
-	}
-
-	return event, nil
-}
-
+// MetricValue represents the format of metrics to send
 type MetricValue struct {
 	Timestamp string   `json:"timestamp"`
 	Name      string   `json:"name"`
@@ -48,12 +19,13 @@ type MetricValue struct {
 	Tags      []string `json:"tags"`
 }
 
+// EventValue represents the format of events to send
 type EventValue struct {
-	Timestamp string           `json:"timestamp"`
-	Entity    *types.Entity    `json:"entity"`
-	Check     *types.Check     `json:"check"`
-	Metrics   *types.Metrics   `json:"namespace"`
-	Metadata  types.ObjectMeta `json:"metadata"`
+	Timestamp string            `json:"timestamp"`
+	Entity    *corev2.Entity    `json:"entity"`
+	Check     *corev2.Check     `json:"check"`
+	Metrics   *corev2.Metrics   `json:"namespace"`
+	Metadata  corev2.ObjectMeta `json:"metadata"`
 }
 
 // {
@@ -87,7 +59,8 @@ func buildTag(key string, value string, prefix string) string {
 	return fmt.Sprintf("%s_%s", key, value)
 }
 
-func GetMetricFromPoint(point *types.MetricPoint, entityID string, namespaceID string, entityLabels map[string]string, pointNameAsMetricName bool) (MetricValue, error) {
+// GetMetricFromPoint extracts the metrics points into a MetricValue type
+func GetMetricFromPoint(point *corev2.MetricPoint, entityID string, namespaceID string, entityLabels map[string]string, pointNameAsMetricName bool) (MetricValue, error) {
 	var metric MetricValue
 
 	metric.Entity = entityID
@@ -120,7 +93,8 @@ func GetMetricFromPoint(point *types.MetricPoint, entityID string, namespaceID s
 	return metric, nil
 }
 
-func ParseEventTimestamp(event *types.Event) (EventValue, error) {
+// ParseEventTimestamp returns the event timestamp in a string format
+func ParseEventTimestamp(event *corev2.Event) (EventValue, error) {
 	var eventValue EventValue
 
 	eventValue.Entity = event.Entity
