@@ -9,6 +9,7 @@ import (
 	corev2 "github.com/sensu/sensu-go/api/core/v2"
 )
 
+// MetricValue represents the format of metrics to send
 type MetricValue struct {
 	Timestamp string   `json:"timestamp"`
 	Name      string   `json:"name"`
@@ -18,6 +19,7 @@ type MetricValue struct {
 	Tags      []string `json:"tags"`
 }
 
+// EventValue represents the format of events to send
 type EventValue struct {
 	Timestamp string            `json:"timestamp"`
 	Entity    *corev2.Entity    `json:"entity"`
@@ -57,6 +59,7 @@ func buildTag(key string, value string, prefix string) string {
 	return fmt.Sprintf("%s_%s", key, value)
 }
 
+// GetMetricFromPoint extracts the metrics points into a MetricValue type
 func GetMetricFromPoint(point *corev2.MetricPoint, entityID string, namespaceID string, entityLabels map[string]string, pointNameAsMetricName bool) (MetricValue, error) {
 	var metric MetricValue
 
@@ -90,6 +93,7 @@ func GetMetricFromPoint(point *corev2.MetricPoint, entityID string, namespaceID 
 	return metric, nil
 }
 
+// ParseEventTimestamp returns the event timestamp in a string format
 func ParseEventTimestamp(event *corev2.Event) (EventValue, error) {
 	var eventValue EventValue
 
