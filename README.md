@@ -1,5 +1,5 @@
 # Sensu Go Elasticsearch metric handler plugin
-[![Bonsai Asset Badge](https://img.shields.io/badge/Sensu%20Go%20Elasticsearch-Download%20Me-brightgreen.svg?colorB=89C967&logo=sensu)](https://bonsai.sensu.io/assets/nixwiz/sensu-go-elasticsearch)[![Go Test](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/Go%20Test/badge.svg)](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/Go%20Test)[![Go Lint](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/Go%20Lint/badge.svg)](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/Go%20Lint)[![goreleaser](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/goreleaser/badge.svg)](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/goreleaser)
+[![Bonsai Asset Badge](https://img.shields.io/badge/Sensu%20Go%20Elasticsearch-Download%20Me-brightgreen.svg?colorB=89C967&logo=sensu)](https://bonsai.sensu.io/assets/nixwiz/sensu-go-elasticsearch)[![Go Test](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/Go%20Test/badge.svg)](https://github.com/nixwiz/sensu-go-elasticsearch/actions?query=workflow%3A%22Go+Test%22)[![Go Lint](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/Go%20Lint/badge.svg)](https://github.com/nixwiz/sensu-go-elasticsearch/actions?query=workflow%3A%22Go+Lint%22)[![goreleaser](https://github.com/nixwiz/sensu-go-elasticsearch/workflows/goreleaser/badge.svg)](https://github.com/nixwiz/sensu-go-elasticsearch/actions?query=workflow%3A%22goreleaser%22)
 
 ## Table of Contents
 - [Overview](#overview)
@@ -99,8 +99,6 @@ spec:
   secrets:
     - name: ELASTICSEARCH_URL
       secret: elasticsearch_urL
-  filters:
-    - has_metrics
 ```
 
 ### Environment Variables
@@ -149,7 +147,7 @@ annotations:
 
 The preferred way of installing and deploying this plugin is to use it as an Asset. If you would
 like to compile and install the plugin from source or contribute to it, download the latest version
-or create an executable script from this source.
+or create an executable from this source.
 
 From the local path of the sensu-go-elasticsearch repository:
 
