@@ -77,7 +77,7 @@ spec:
     - nixwiz/sensu-go-elasticsearch
   secrets:
     - name: ELASTICSEARCH_URL
-      secret: elasticsearch_urL
+      secret: elasticsearch_url
   filters:
     - has_metrics
 ```
@@ -98,7 +98,7 @@ spec:
     - nixwiz/sensu-go-elasticsearch
   secrets:
     - name: ELASTICSEARCH_URL
-      secret: elasticsearch_urL
+      secret: elasticsearch_url
 ```
 
 ### Environment Variables
@@ -162,7 +162,7 @@ For more information about contributing to this plugin, see [Contributing][1].
 [1]: https://github.com/sensu/sensu-go/blob/master/CONTRIBUTING.md
 [2]: https://docs.sensu.io/sensu-go/latest/reference/handlers/
 [3]: https://docs.sensu.io/sensu-go/latest/reference/assets/
-[4]: https://bonsai.sensu.io/assets/nixwiz/sensu-go-elasticsearch].
+[4]: https://bonsai.sensu.io/assets/nixwiz/sensu-go-elasticsearch
 [5]: https://docs.sensu.io/sensu-go/latest/guides/secrets-management/
 [6]: https://docs.sensu.io/sensu-go/latest/guides/secrets-management/#use-env-for-secrets-management
 
